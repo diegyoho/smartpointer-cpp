@@ -9,6 +9,10 @@ public:
 
     explicit SharedPointer(T* pointer) : pointer{ pointer }
     {
+        if(pointer)
+        {
+            IncreaseReference();
+        }
     }
     
     explicit SharedPointer(T&& value) : SharedPointer{ new T{ value } }
@@ -17,10 +21,35 @@ public:
     
     ~SharedPointer()
     {
-        delete pointer;
+        DecreaseReference();
     }
-
+    
 private:
+    
+    T* pointer{nullptr};
+    unsigned int* refCounter{nullptr};
 
-    T* pointer{ nullptr };
+    void IncreaseReference()
+    {
+        if(!refCounter)
+        {
+            refCounter = new unsigned int{};
+        }
+
+        ++(*refCounter);
+    }
+    
+    void DecreaseReference() const
+    {
+        if(refCounter && --(*refCounter) == 0)
+        {
+            DeletePointer();
+        }
+    }
+    
+    void DeletePointer() const
+    {
+        delete pointer;
+        delete refCounter;
+    }
 };
