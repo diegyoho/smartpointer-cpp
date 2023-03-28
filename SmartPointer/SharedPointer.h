@@ -1,55 +1,88 @@
 ﻿#pragma once
+#include <utility>
 
-template <class T>
-class SharedPointer
+namespace SmartPointer
 {
-public:
-
-    SharedPointer() = default;
-
-    explicit SharedPointer(T* pointer) : pointer{ pointer }
+    template <class T>
+    class SharedPointer
     {
-        if(pointer)
+    public:
+
+        SharedPointer() = default;
+
+        explicit SharedPointer(T* pointer) : pointer{ pointer }
         {
+            if(pointer)
+            {
+                IncreaseReference();
+            }
+        }
+    
+        explicit SharedPointer(T&& value) : SharedPointer{ new T{ value } }
+        {
+        }
+
+        SharedPointer(const SharedPointer<T>& other)
+        {
+            pointer = other.pointer;
+            refCounter = other.refCounter;
+
             IncreaseReference();
         }
-    }
     
-    explicit SharedPointer(T&& value) : SharedPointer{ new T{ value } }
-    {
-    }
-    
-    ~SharedPointer()
-    {
-        DecreaseReference();
-    }
-    
-private:
-    
-    T* pointer{nullptr};
-    unsigned int* refCounter{nullptr};
-
-    void IncreaseReference()
-    {
-        if(!refCounter)
+        ~SharedPointer()
         {
-            refCounter = new unsigned int{};
+            DecreaseReference();
         }
 
-        ++(*refCounter);
-    }
-    
-    void DecreaseReference() const
-    {
-        if(refCounter && --(*refCounter) == 0)
+        SharedPointer<T>& operator=(const SharedPointer<T>& other)
         {
-            DeletePointer();
+            if(this == &other || this->pointer == other.pointer)
+            {
+                return *this;
+            }
+        
+            pointer = other.pointer;
+            refCounter = other.refCounter;
+
+            IncreaseReference();
+        
+            return *this;
         }
-    }
     
-    void DeletePointer() const
+    private:
+    
+        T* pointer{nullptr};
+        unsigned int* refCounter{nullptr};
+
+        void IncreaseReference()
+        {
+            if(!refCounter)
+            {
+                refCounter = new unsigned int{};
+            }
+
+            ++(*refCounter);
+        }
+    
+        void DecreaseReference() const
+        {
+            if(refCounter && --(*refCounter) == 0)
+            {
+                DeletePointer();
+            }
+        }
+    
+        void DeletePointer() const
+        {
+            delete pointer;
+            delete refCounter;
+        }
+    };
+
+    template<class TPointer, class... Params>
+    static SharedPointer<TPointer> MakeShared(Params&&... args)
     {
-        delete pointer;
-        delete refCounter;
+        return SharedPointer<TPointer> { std::forward<Params>(args)... };
     }
-};
+}

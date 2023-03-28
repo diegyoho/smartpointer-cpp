@@ -2,6 +2,9 @@
 
 int main()
 {
-    SharedPointer<int> integer{42};
+    SmartPointer::SharedPointer<int> integer = SmartPointer::MakeShared<int>(42);
+    auto integer2{integer};
+    SmartPointer::SharedPointer<int> integer3{};
+    integer3 = integer2;
     return 0;
 }
