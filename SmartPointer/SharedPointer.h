@@ -48,6 +48,16 @@ namespace SmartPointer
             return *this;
         }
 
+        void Reset(T* pointer = nullptr)
+        {
+            DecreaseReference();
+            
+            this->pointer = pointer;
+            this->refCounter = nullptr;
+
+            IncreaseReference();
+        }
+
         T& operator*() const
         {
             return *Get();
