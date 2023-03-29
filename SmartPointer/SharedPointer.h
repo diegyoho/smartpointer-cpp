@@ -37,6 +37,8 @@ namespace SmartPointer
         {
             if(this != &rhs && this->pointer != rhs.pointer)
             {
+                DecreaseReference();
+                
                 pointer = rhs.pointer;
                 refCounter = rhs.refCounter;
 
