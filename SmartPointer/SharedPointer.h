@@ -28,6 +28,11 @@ namespace SmartPointer
             DecreaseReference();
         }
 
+        T* Get() const
+        {
+            return pointer;
+        }
+
         SharedPointer<T>& operator=(const SharedPointer<T>& rhs)
         {
             if(this != &rhs && this->pointer != rhs.pointer)
@@ -39,6 +44,16 @@ namespace SmartPointer
             }
         
             return *this;
+        }
+
+        T& operator*() const
+        {
+            return *Get();
+        }
+
+        T* operator->() const
+        {
+            return Get();
         }
     
     private:
